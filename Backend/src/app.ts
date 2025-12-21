@@ -25,7 +25,7 @@ const swaggerOptions: swaggerJsdoc.Options = {
       {
         url: "http://localhost:5000"
       }
-    ]
+    ] 
   },
   apis: ["./src/modules/**/*.ts"]
 };
