@@ -4,15 +4,19 @@ import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
 
 import authRoutes from "./modules/auth/auth.routes";
+import categoryRoutes from "./modules/category/category.routes";
+import gameRoutes from "./modules/games/game.routes";
+import roomRoutes from "./modules/room/room.routes";
+import leaderboardRoutes from "./modules/leaderboard/leaderboard.routes"
+
+import { errorHandler } from "./infrastrcutre/errorHandler";
 
 const app = express();
 
-// Middlewares
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Swagger setup
 const swaggerOptions: swaggerJsdoc.Options = {
   definition: {
     openapi: "3.0.0",
@@ -25,7 +29,17 @@ const swaggerOptions: swaggerJsdoc.Options = {
       {
         url: "http://localhost:5000"
       }
-    ] 
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT"
+        }
+      }
+    },
+    security: [{ bearerAuth: [] }]
   },
   apis: ["./src/modules/**/*.ts"]
 };
@@ -38,14 +52,18 @@ app.use(
   swaggerUi.setup(swaggerSpec, { explorer: true })
 );
 
-// Routes
 app.use("/auth", authRoutes);
+app.use("/categories", categoryRoutes);
+app.use("/games", gameRoutes);
+app.use("/rooms", roomRoutes);
+app.use("/leaderboard", leaderboardRoutes);
 
-// Health check
 app.get("/", (_req, res) => {
   res.send(
-    '<h1>Server running 🚀 <a href="/swagger">Swagger Docs</a></h1>'
+    '<h1>PlaySync API running  <a href="/swagger">Swagger Docs</a></h1>'
   );
 });
+
+app.use(errorHandler);
 
 export default app;

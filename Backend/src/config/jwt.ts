@@ -1,6 +1,12 @@
-export const jwtConfig = {
-  accessSecret: process.env.JWT_ACCESS_SECRET as string,
-  refreshSecret: process.env.JWT_REFRESH_SECRET as string,
-  accessExpiry: "10m",
-  refreshExpiry: "7d",
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET || "playsync_secret";
+const JWT_EXPIRES_IN = "7d";
+
+export const signToken = (payload: object) => {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+};
+
+export const verifyToken = (token: string) => {
+  return jwt.verify(token, JWT_SECRET);
 };
