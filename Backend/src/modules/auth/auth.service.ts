@@ -1,53 +1,32 @@
 import bcrypt from "bcryptjs";
-import User from "../auth/user.model";
-import { signToken } from "../../config/jwt";
-import { RegisterDTO, LoginDTO } from "./auth.dto";
+import jwt from "jsonwebtoken";
+import * as UserRepo from "../users/user.repository";
+import { AppError } from "../../utils/appError";
 
-export const registerUser = async (data: RegisterDTO) => {
-  const existingUser = await User.findOne({ email: data.email });
-  if (existingUser) {
-    throw new Error("User already exists");
-  }
+import { LoginDto } from "../users/login.dto";
 
-  const hashedPassword = await bcrypt.hash(data.password, 10);
-
-  const user = await User.create({
-    username: data.username,
-    email: data.email,
-    password: hashedPassword
-  });
-
-  const token = signToken({ id: user._id, role: user.role });
-
-  return {
-    user: {
-      id: user._id,
-      username: user.username,
-      email: user.email
-    },
-    token
-  };
-};
-
-export const loginUser = async (data: LoginDTO) => {
-  const user = await User.findOne({ email: data.email });
+export const login = async (data: LoginDto) => {
+  const user = await UserRepo.findByEmail(data.email);
   if (!user) {
-    throw new Error("Invalid credentials");
+    throw new AppError("Invalid email or password", 401);
   }
 
   const isMatch = await bcrypt.compare(data.password, user.password);
   if (!isMatch) {
-    throw new Error("Invalid credentials");
+    throw new AppError("Invalid email or password", 401);
   }
 
-  const token = signToken({ id: user._id, role: user.role });
+  const token = jwt.sign(
+    {
+      id: user._id,
+      role: user.role,
+    },
+    process.env.JWT_SECRET!,
+    { expiresIn: "7d" }
+  );
 
   return {
-    user: {
-      id: user._id,
-      username: user.username,
-      email: user.email
-    },
-    token
+    token,
+    role: user.role,
   };
 };

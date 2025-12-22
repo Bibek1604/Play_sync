@@ -1,28 +1,23 @@
-import { Request, Response, NextFunction } from "express";
-import { verifyToken } from "../../config/jwt";
+import jwt from "jsonwebtoken";
+import { AppError } from "../../utils/appError";
 
-interface AuthRequest extends Request {
-  user?: any;
-}
+export const auth = (req: any, _res: any, next: any) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return next(new AppError("Unauthorized", 401));
 
-export const authenticate = (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Authentication required" });
-    }
-
-    const token = authHeader.split(" ")[1];
-    const decoded = verifyToken(token);
-
-    req.user = decoded;
+    req.user = jwt.verify(token, process.env.JWT_SECRET!);
     next();
-  } catch (error) {
-    return res.status(401).json({ message: "Invalid or expired token" });
+  } catch {
+    next(new AppError("Invalid token", 401));
   }
 };
+
+export const authorize =
+  (...roles: string[]) =>
+  (req: any, _res: any, next: any) => {
+    if (!roles.includes(req.user.role)) {
+      return next(new AppError("Forbidden", 403));
+    }
+    next();
+  };

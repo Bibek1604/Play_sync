@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
+import path from "path";
 
 import authRoutes from "./modules/auth/auth.routes";
 import categoryRoutes from "./modules/category/category.routes";
@@ -9,8 +10,7 @@ import gameRoutes from "./modules/games/game.routes";
 import roomRoutes from "./modules/room/room.routes";
 import leaderboardRoutes from "./modules/leaderboard/leaderboard.routes"
 
-import { errorHandler } from "./infrastrcutre/errorHandler";
-
+import { logger } from "./utils/logger";
 const app = express();
 
 app.use(cors());
@@ -23,7 +23,7 @@ const swaggerOptions: swaggerJsdoc.Options = {
     info: {
       title: "PlaySync API",
       version: "1.0.0",
-      description: "API documentation for PlaySync backend"
+      description: "API documentation for PlaySync "
     },
     servers: [
       {
@@ -41,7 +41,7 @@ const swaggerOptions: swaggerJsdoc.Options = {
     },
     security: [{ bearerAuth: [] }]
   },
-  apis: ["./src/modules/**/*.ts"]
+  apis: [path.join(__dirname, "modules/**/*.ts")]
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
@@ -64,6 +64,9 @@ app.get("/", (_req, res) => {
   );
 });
 
-app.use(errorHandler);
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  logger.error(err.stack);
+  res.status(500).json({ message: "Internal Server Error" });
+});
 
 export default app;

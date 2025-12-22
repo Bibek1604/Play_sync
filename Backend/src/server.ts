@@ -3,7 +3,7 @@ import http from "http";
 import app from "./app";
 import connectDB from "./config/db";
 import { initSocket } from "./websocket/socket.server";
-import { logger } from "./infrastrcutre/logger";
+import { logger } from "./utils/logger";
 
 dotenv.config();
 
