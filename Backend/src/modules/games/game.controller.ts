@@ -6,7 +6,7 @@ import {
   getAllGames,
   getGameById,
   updateGame,
-  removeGame
+  deleteGame as removeGame,
 } from "./game.service";
 
 
@@ -55,8 +55,7 @@ export const update = async (req: Request, res: Response) => {
 
 export const remove = async (req: Request, res: Response) => {
   try {
-    const game = await removeGame(req.params.id);
-    if (!game) return res.status(404).json({ message: "Game not found" });
+    const deleted = await removeGame(req.params.id);
     res.json({ message: "Game deleted" });
   } catch (error: any) {
     res.status(400).json({ message: error.message });
