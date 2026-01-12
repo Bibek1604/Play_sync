@@ -27,7 +27,17 @@ export const getAllUsers = async (
     next(error);
   }
 };
-export function adminCreateUser(arg0: string, auth: (req: any, _res: any, next: any) => any, arg2: (req: any, _res: any, next: any) => any, adminCreateUser: any) {
-    throw new Error("Function not implemented.");
-}
+export const adminCreateUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Implement admin create user logic
+    const user = await UserService.createUser(req.body);
+    successResponse(res, user, "User created successfully");
+  } catch (error) {
+    next(error);
+  }
+};
 

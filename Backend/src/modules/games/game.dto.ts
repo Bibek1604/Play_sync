@@ -1,12 +1,21 @@
-import { z } from "zod";
+export interface CreateGameDTO {
+  name: string;
+  image: string;
+  categoryId: string;
 
-export const CreateGameDTO = z.object({
-  name: z.string().min(3),
-  image: z.string().url(),
-  category: z.string(),
-  playType: z.enum(["online", "offline"]),
-  description: z.string().max(500).optional(),
-  order: z.number().optional(),
-});
+  gameType: "online" | "offline";
+  gameMode: "solo" | "1v1" | "multiplayer" | "tournament";
 
-export type CreateGameDto = z.infer<typeof CreateGameDTO>;
+  requiredPlayers: number;
+  location?: string;
+
+  pricingType: "free" | "paid";
+  price?: number;
+}
+
+export interface UpdateGameDTO {
+  name?: string;
+  image?: string;
+  location?: string;
+  status?: "open" | "full" | "started" | "ended";
+}

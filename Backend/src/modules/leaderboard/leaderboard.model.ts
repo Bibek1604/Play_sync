@@ -1,23 +1,28 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface ILeaderboard extends Document {
-  room: mongoose.Types.ObjectId;
-  user: mongoose.Types.ObjectId;
-  score: number;
+  userId: mongoose.Types.ObjectId;
+  gamesJoined: number;
+  gamesCreated: number;
+  totalActivity: number; // Primary ranking metric
+  lastActive: Date;
 }
 
 const LeaderboardSchema = new Schema<ILeaderboard>(
   {
-    room: { type: Schema.Types.ObjectId, ref: "Room", required: true },
-    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    score: { type: Number, default: 0 }
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true },
+    gamesJoined: { type: Number, default: 0 },
+    gamesCreated: { type: Number, default: 0 },
+    totalActivity: { type: Number, default: 0 }, // gamesJoined * 2 + gamesCreated
+    lastActive: { type: Date, default: Date.now }
   },
   { timestamps: true }
 );
 
-LeaderboardSchema.index({ room: 1, user: 1 }, { unique: true });
+LeaderboardSchema.index({ totalActivity: -1 });
+LeaderboardSchema.index({ gamesJoined: -1 });
 
-export default mongoose.model<ILeaderboard>(
+export const LeaderboardModel = mongoose.model<ILeaderboard>(
   "Leaderboard",
   LeaderboardSchema
 );

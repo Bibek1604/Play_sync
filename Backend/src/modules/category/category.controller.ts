@@ -1,75 +1,84 @@
-import { Request, Response, NextFunction } from "express";
-import * as CategoryService from "./category.service";
-import { successResponse } from "../../utils/responseFormatter";
+import { Request, Response } from "express";
+import { CategoryService } from "./category.service";
+import { CategoryRepository } from "./category.repository";
 
-export const create = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const category = await CategoryService.createCategory(
-      req.body.name,
-      req.body.image
-    );
-    successResponse(res, category, "Category created", 201);
-  } catch (err) {
-    next(err);
-  }
-};
+const categoryService = new CategoryService(
+  new CategoryRepository()
+);
 
-export const getAll = async (
-  _req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const categories = await CategoryService.getAllCategories();
-    successResponse(res, categories);
-  } catch (err) {
-    next(err);
-  }
-};
+export class CategoryController {
+  static async create(req: Request, res: Response) {
+    try {
+      const category = await categoryService.createCategory(
+        req.body,
+        req.user!.id // from auth middleware
+      );
 
-export const getById = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const category = await CategoryService.getCategoryById(req.params.id);
-    successResponse(res, category);
-  } catch (err) {
-    next(err);
+      res.status(201).json({
+        success: true,
+        data: category,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
   }
-};
 
-export const update = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const category = await CategoryService.updateCategory(
-      req.params.id,
-      req.body.name,
-      req.body.image
-    );
-    successResponse(res, category, "Category updated");
-  } catch (err) {
-    next(err);
-  }
-};
+  static async update(req: Request, res: Response) {
+    try {
+      const category = await categoryService.updateCategory(
+        req.params.id,
+        req.body
+      );
 
-export const remove = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    await CategoryService.removeCategory(req.params.id);
-    successResponse(res, null, "Category deleted");
-  } catch (err) {
-    next(err);
+      if (!category) {
+        return res.status(404).json({
+          success: false,
+          message: "Category not found",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        data: category,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
   }
-};
+
+  static async getAll(req: Request, res: Response) {
+    try {
+      const categories = await categoryService.getAllCategories();
+      res.status(200).json({
+        success: true,
+        data: categories,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+
+  static async delete(req: Request, res: Response) {
+    try {
+      await categoryService.deleteCategory(req.params.id);
+      res.status(200).json({
+        success: true,
+        message: "Category deleted successfully",
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+}

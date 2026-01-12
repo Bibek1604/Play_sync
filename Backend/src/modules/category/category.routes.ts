@@ -1,35 +1,43 @@
 import { Router } from "express";
-import * as CategoryController from "./category.controller";
-import { auth, authorize } from "../auth/auth.middleware";
-import { validateDto } from "../../utils/validateDto";
-import { CreateCategoryDTO } from "./category.dto";
+import { CategoryController } from "./category.controller";
+import { auth } from "../auth/auth.middleware";
+import { adminOnly } from "../auth/auth.admin.middleware";
+import {
+  createCategoryValidation,
+  updateCategoryValidation,
+  mongoIdValidation,
+} from "../../utils/validators";
 
 const router = Router();
 
 router.post(
   "/",
   auth,
-  authorize("admin"),
-  validateDto(CreateCategoryDTO),
+  adminOnly,
+  createCategoryValidation,
   CategoryController.create
+);
+
+router.get(
+  "/",
+  CategoryController.getAll
 );
 
 router.put(
   "/:id",
   auth,
-  authorize("admin"),
-  validateDto(CreateCategoryDTO),
+  adminOnly,
+  mongoIdValidation("id"),
+  updateCategoryValidation,
   CategoryController.update
 );
 
 router.delete(
   "/:id",
   auth,
-  authorize("admin"),
-  CategoryController.remove
+  adminOnly,
+  mongoIdValidation("id"),
+  CategoryController.delete
 );
-
-router.get("/", auth, CategoryController.getAll);
-router.get("/:id", auth, CategoryController.getById);
 
 export default router;

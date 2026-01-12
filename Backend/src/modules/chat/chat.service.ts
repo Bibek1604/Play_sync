@@ -1,19 +1,19 @@
-import Chat from "./chat.model";
+import { ChatModel as Chat } from "./chat.model";
 
 export const saveMessage = async (
-  roomId: string,
+  gameId: string,
   senderId: string,
   message: string
 ) => {
   return await Chat.create({
-    room: roomId,
-    sender: senderId,
+    gameId,
+    senderId,
     message
   });
 };
 
-export const getMessagesByRoom = async (roomId: string) => {
-  return await Chat.find({ room: roomId })
-    .populate("sender", "username")
+export const getMessagesByGame = async (gameId: string) => {
+  return await Chat.find({ gameId })
+    .populate("senderId", "fullName email")
     .sort({ createdAt: 1 });
 };

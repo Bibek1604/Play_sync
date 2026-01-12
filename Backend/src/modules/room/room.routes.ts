@@ -1,6 +1,6 @@
 
 import { Router } from "express";
-import { authenticate } from "../auth/auth.middleware";
+import { auth } from "../auth/auth.middleware";
 import { create, join, accept } from "./room.controller";
 
 const router = Router();
@@ -35,7 +35,7 @@ const router = Router();
  *       201:
  *         description: Room created
  */
-router.post("/", authenticate, create);
+router.post("/", auth, create);
 
 /**
  * @swagger
@@ -55,7 +55,7 @@ router.post("/", authenticate, create);
  *       200:
  *         description: Join request sent
  */
-router.post("/:roomId/join", authenticate, join);
+router.post("/:roomId/join", auth, join);
 
 /**
  * @swagger
@@ -75,6 +75,6 @@ router.post("/:roomId/join", authenticate, join);
  *       200:
  *         description: Invitation accepted
  */
-router.post("/accept/:invitationId", authenticate, accept);
+router.post("/accept/:invitationId", auth, accept);
 
 export default router;

@@ -1,151 +1,28 @@
-
 import { Router } from "express";
-import { authenticate } from "../auth/auth.middleware";
-import { create, getByCategory, getAll, getById, update, remove } from "./game.controller";
+import { GameController } from "./game.controller";
+import { auth } from "../auth/auth.middleware";
+import { adminOnly } from "../auth/auth.admin.middleware";
+import {
+  createGameValidation,
+  updateGameValidation,
+} from "../../utils/validators";
 
 const router = Router();
 
-/**
- * @swagger
- * tags:
- *   name: Games
- *   description: Game management endpoints
- */
+// Normal users can create games
+router.post("/", auth, createGameValidation, GameController.create);
+router.get("/", auth, GameController.getAll);
 
-/**
- * @swagger
- * /games:
- *   post:
- *     summary: Create a new game
- *     tags: [Games]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               category:
- *                 type: string
- *               description:
- *                 type: string
- *     responses:
- *       201:
- *         description: Game created
- *       400:
- *         description: Bad request
- */
-router.post("/", authenticate, create);
-
-/**
- * @swagger
- * /games:
- *   get:
- *     summary: Get all games
- *     tags: [Games]
- *     responses:
- *       200:
- *         description: List of games
- */
-router.get("/", getAll);
-
-/**
- * @swagger
- * /games/{id}:
- *   get:
- *     summary: Get game by ID
- *     tags: [Games]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Game found
- *       404:
- *         description: Game not found
- */
-router.get("/:id", getById);
-
-/**
- * @swagger
- * /games/{id}:
- *   put:
- *     summary: Update game by ID
- *     tags: [Games]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               category:
- *                 type: string
- *               description:
- *                 type: string
- *     responses:
- *       200:
- *         description: Game updated
- *       404:
- *         description: Game not found
- */
-router.put("/:id", authenticate, update);
-
-/**
- * @swagger
- * /games/{id}:
- *   delete:
- *     summary: Delete game by ID
- *     tags: [Games]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Game deleted
- *       404:
- *         description: Game not found
- */
-router.delete("/:id", authenticate, remove);
-
-/**
- * @swagger
- * /games/category/{categoryId}:
- *   get:
- *     summary: Get games by category
- *     tags: [Games]
- *     parameters:
- *       - in: path
- *         name: categoryId
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: List of games
- */
-router.get("/category/:categoryId", getByCategory);
+// User game history
+router.get("/my/created", auth, GameController.getMyCreatedGames);
+router.get("/my/joined", auth, GameController.getMyJoinedGames);
+router.get("/user/:userId/created", auth, GameController.getUserCreatedGames);
+router.get("/user/:userId/joined", auth, GameController.getUserJoinedGames);
+router.get("/category", auth, GameController.getByCategory);
+router.get("/:gameId", auth, GameController.getById);
+router.put("/:gameId", auth, adminOnly, updateGameValidation, GameController.update);
+router.delete("/:gameId", auth, adminOnly, GameController.deleteGame);
+router.post("/:gameId/join", auth, GameController.join);
+router.post("/:gameId/leave", auth, GameController.leave);
 
 export default router;

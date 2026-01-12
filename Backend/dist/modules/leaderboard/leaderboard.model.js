@@ -33,12 +33,16 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.LeaderboardModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const LeaderboardSchema = new mongoose_1.Schema({
-    room: { type: mongoose_1.Schema.Types.ObjectId, ref: "Room", required: true },
-    user: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
-    score: { type: Number, default: 0 }
+    userId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true, unique: true },
+    gamesJoined: { type: Number, default: 0 },
+    gamesCreated: { type: Number, default: 0 },
+    totalActivity: { type: Number, default: 0 },
+    lastActive: { type: Date, default: Date.now }
 }, { timestamps: true });
-LeaderboardSchema.index({ room: 1, user: 1 }, { unique: true });
-exports.default = mongoose_1.default.model("Leaderboard", LeaderboardSchema);
+LeaderboardSchema.index({ totalActivity: -1 });
+LeaderboardSchema.index({ gamesJoined: -1 });
+exports.LeaderboardModel = mongoose_1.default.model("Leaderboard", LeaderboardSchema);
 //# sourceMappingURL=leaderboard.model.js.map

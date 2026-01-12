@@ -1,12 +1,18 @@
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "playsync_secret";
-const JWT_EXPIRES_IN = "7d";
+const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET!;
+const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
 
-export const signToken = (payload: object) => {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+export const signAccessToken = (payload: object) => {
+  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: "15m" });
 };
 
-export const verifyToken = (token: string) => {
-  return jwt.verify(token, JWT_SECRET);
+export const signRefreshToken = (payload: object) => {
+  return jwt.sign(payload, REFRESH_SECRET, { expiresIn: "7d" });
 };
+
+export const verifyAccessToken = (token: string) =>
+  jwt.verify(token, ACCESS_SECRET);
+
+export const verifyRefreshToken = (token: string) =>
+  jwt.verify(token, REFRESH_SECRET);

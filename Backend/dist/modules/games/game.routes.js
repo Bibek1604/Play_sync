@@ -1,10 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const auth_middleware_1 = require("../auth/auth.middleware");
 const game_controller_1 = require("./game.controller");
+const auth_middleware_1 = require("../auth/auth.middleware");
+const auth_admin_middleware_1 = require("../auth/auth.admin.middleware");
+const validators_1 = require("../../utils/validators");
 const router = (0, express_1.Router)();
-router.post("/", auth_middleware_1.authenticate, game_controller_1.create);
-router.get("/category/:categoryId", game_controller_1.getByCategory);
+router.post("/", auth_middleware_1.auth, validators_1.createGameValidation, game_controller_1.GameController.create);
+router.get("/", auth_middleware_1.auth, game_controller_1.GameController.getAll);
+router.get("/my/created", auth_middleware_1.auth, game_controller_1.GameController.getMyCreatedGames);
+router.get("/my/joined", auth_middleware_1.auth, game_controller_1.GameController.getMyJoinedGames);
+router.get("/user/:userId/created", auth_middleware_1.auth, game_controller_1.GameController.getUserCreatedGames);
+router.get("/user/:userId/joined", auth_middleware_1.auth, game_controller_1.GameController.getUserJoinedGames);
+router.get("/category", auth_middleware_1.auth, game_controller_1.GameController.getByCategory);
+router.get("/:gameId", auth_middleware_1.auth, game_controller_1.GameController.getById);
+router.put("/:gameId", auth_middleware_1.auth, auth_admin_middleware_1.adminOnly, validators_1.updateGameValidation, game_controller_1.GameController.update);
+router.delete("/:gameId", auth_middleware_1.auth, auth_admin_middleware_1.adminOnly, game_controller_1.GameController.deleteGame);
+router.post("/:gameId/join", auth_middleware_1.auth, game_controller_1.GameController.join);
+router.post("/:gameId/leave", auth_middleware_1.auth, game_controller_1.GameController.leave);
 exports.default = router;
 //# sourceMappingURL=game.routes.js.map

@@ -1,39 +1,55 @@
-import Game from "./game.model";
+import { GameModel, IGame } from "./game.model";
+import { CreateGameDTO } from "./game.dto";
 
-export const createGame = (data: any) => {
-  return Game.create(data);
-};
+export class GameRepository {
+  async create(data: CreateGameDTO & { gameId: string; createdBy: string }): Promise<IGame> {
+    return GameModel.create(data);
+  }
 
-export const findByNameAndCategory = (
-  name: string,
-  category: string
-) => {
-  return Game.findOne({ name, category });
-};
+  async findByCategory(categoryId: string): Promise<IGame[]> {
+    return GameModel.find({ categoryId })
+      .populate("categoryId", "name image")
+      .sort({ createdAt: -1 });
+  }
 
-export const findAllActive = () => {
-  return Game.find({
-    isActive: true,
-    status: "active",
-  }).populate("category", "name image");
-};
+  async findById(gameId: string): Promise<IGame | null> {
+    return GameModel.findOne({ gameId });
+  }
 
-export const findByCategory = (categoryId: string) => {
-  return Game.find({
-    category: categoryId,
-    isActive: true,
-    status: "active",
-  }).populate("category", "name image");
-};
+  async findAll(): Promise<IGame[]> {
+    return GameModel.find()
+      .populate("categoryId", "name image")
+      .sort({ createdAt: -1 });
+  }
 
-export const findById = (id: string) => {
-  return Game.findById(id).populate("category", "name image");
-};
+  async updateById(gameId: string, data: any): Promise<IGame | null> {
+    return GameModel.findOneAndUpdate({ gameId }, data, { new: true });
+  }
 
-export const updateById = (id: string, data: any) => {
-  return Game.findByIdAndUpdate(id, data, { new: true });
-};
+  async deleteById(gameId: string): Promise<IGame | null> {
+    return GameModel.findOneAndDelete({ gameId });
+  }
 
-export const deleteById = (id: string) => {
-  return Game.findByIdAndDelete(id);
-};
+  async save(game: IGame): Promise<IGame> {
+    return game.save();
+  }
+
+  async findByCreator(userId: string): Promise<IGame[]> {
+    return GameModel.find({ createdBy: userId })
+      .populate("categoryId", "name image")
+      .sort({ createdAt: -1 });
+  }
+
+  async findByPlayer(userId: string): Promise<IGame[]> {
+    return GameModel.find({ players: userId })
+      .populate("categoryId", "name image")
+      .sort({ createdAt: -1 });
+  }
+
+  async findActiveGameByCreator(userId: string): Promise<IGame | null> {
+    return GameModel.findOne({ 
+      createdBy: userId, 
+      status: { $in: ["open", "full", "started"] } 
+    });
+  }
+}

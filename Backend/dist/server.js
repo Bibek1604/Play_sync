@@ -8,7 +8,7 @@ const http_1 = __importDefault(require("http"));
 const app_1 = __importDefault(require("./app"));
 const db_1 = __importDefault(require("./config/db"));
 const socket_server_1 = require("./websocket/socket.server");
-const logger_1 = require("./infrastrcutre/logger");
+const logger_1 = require("./utils/logger");
 dotenv_1.default.config();
 const PORT = process.env.PORT || 5000;
 (async () => {

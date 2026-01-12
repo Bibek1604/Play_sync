@@ -1,74 +1,53 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IGame extends Document {
+  gameId: string;
   name: string;
-  slug: string;
   image: string;
-  category: mongoose.Types.ObjectId;
-  playType: "online" | "offline";
-  description?: string;
-  status: "draft" | "active";
-  isActive: boolean;
-  order: number;
+
+  categoryId: mongoose.Types.ObjectId;
+
+  gameType: "online" | "offline";
+  gameMode: "solo" | "1v1" | "multiplayer" | "tournament";
+
+  requiredPlayers: number;
+  joinedPlayers: number;
+  players: mongoose.Types.ObjectId[];
+
+  location: string;
+
+  pricingType: "free" | "paid";
+  price?: number;
+
+  status: "open" | "full" | "started" | "ended";
+  createdBy: mongoose.Types.ObjectId;
 }
 
-const GameSchema = new Schema<IGame>(
+const GameSchema = new Schema(
   {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    gameId: { type: String, unique: true, required: true },
+    name: { type: String, required: true },
+    image: { type: String, required: true },
 
-    slug: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-    },
+    categoryId: { type: Schema.Types.ObjectId, ref: "Category", required: true },
 
-    image: {
-      type: String,
-      required: true, // image URL (Cloudinary/S3 later)
-    },
+    gameType: { type: String, enum: ["online", "offline"], required: true },
+    gameMode: { type: String, enum: ["solo","1v1","multiplayer","tournament"], required: true },
 
-    category: {
-      type: Schema.Types.ObjectId,
-      ref: "Category",
-      required: true,
-      index: true,
-    },
+    requiredPlayers: { type: Number, required: true },
+    joinedPlayers: { type: Number, default: 0 },
+    players: [{ type: Schema.Types.ObjectId, ref: "User" }],
 
-    playType: {
-      type: String,
-      enum: ["online", "offline"],
-      required: true,
-    },
+    location: { type: String, default: "global" },
 
-    description: {
-      type: String,
-      maxlength: 500,
-    },
+    pricingType: { type: String, enum: ["free", "paid"], default: "free" },
+    price: { type: Number, default: 0 },
 
-    status: {
-      type: String,
-      enum: ["draft", "active"],
-      default: "draft",
-    },
+    status: { type: String, enum: ["open", "full", "started", "ended"], default: "open" },
 
-    isActive: {
-      type: Boolean,
-      default: false,
-    },
-
-    order: {
-      type: Number,
-      default: 0,
-    },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
   },
   { timestamps: true }
 );
 
-GameSchema.index({ name: 1, category: 1 }, { unique: true });
-
-export default mongoose.model<IGame>("Game", GameSchema);
+export const GameModel = mongoose.model<IGame>("Game", GameSchema);

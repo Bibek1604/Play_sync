@@ -33,15 +33,23 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.GameModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const GameSchema = new mongoose_1.Schema({
+    gameId: { type: String, unique: true, required: true },
     name: { type: String, required: true },
-    category: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: "Category",
-        required: true
-    },
-    description: { type: String }
+    image: { type: String, required: true },
+    categoryId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Category", required: true },
+    gameType: { type: String, enum: ["online", "offline"], required: true },
+    gameMode: { type: String, enum: ["solo", "1v1", "multiplayer", "tournament"], required: true },
+    requiredPlayers: { type: Number, required: true },
+    joinedPlayers: { type: Number, default: 0 },
+    players: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User" }],
+    location: { type: String, default: "global" },
+    pricingType: { type: String, enum: ["free", "paid"], default: "free" },
+    price: { type: Number, default: 0 },
+    status: { type: String, enum: ["open", "full", "started", "ended"], default: "open" },
+    createdBy: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
 }, { timestamps: true });
-exports.default = mongoose_1.default.model("Game", GameSchema);
+exports.GameModel = mongoose_1.default.model("Game", GameSchema);
 //# sourceMappingURL=game.model.js.map

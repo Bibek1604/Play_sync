@@ -1,63 +1,113 @@
 import { Request, Response } from "express";
+import { GameService } from "./game.service";
+import { GameJoinService } from "./game.join.service";
 
-import {
-  createGame,
-  getGamesByCategory,
-  getAllGames,
-  getGameById,
-  updateGame,
-  deleteGame as removeGame,
-} from "./game.service";
+const gameService = new GameService(new (require("./game.repository").GameRepository)());
 
-
-export const create = async (req: Request, res: Response) => {
-  try {
-    const game = await createGame(req.body);
-    res.status(201).json(game);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
+export class GameController {
+  static async create(req: Request, res: Response) {
+    try {
+      const game = await gameService.createGame(req.body, req.user!.id);
+      res.status(201).json({ success: true, data: game });
+    } catch (err: any) {
+      res.status(400).json({ success: false, message: err.message });
+    }
   }
-};
 
-export const getByCategory = async (req: Request, res: Response) => {
-  try {
-    const games = await getGamesByCategory(req.params.categoryId);
-    res.json(games);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
+  static async getByCategory(req: Request, res: Response) {
+    const { categoryId } = req.query;
+    if (!categoryId) return res.status(400).json({ message: "categoryId required" });
+    const games = await gameService.getGamesByCategory(categoryId as string);
+    res.status(200).json({ success: true, data: games });
   }
-};
 
-export const getAll = async (_req: Request, res: Response) => {
-  const games = await getAllGames();
-  res.json(games);
-};
-
-export const getById = async (req: Request, res: Response) => {
-  try {
-    const game = await getGameById(req.params.id);
-    if (!game) return res.status(404).json({ message: "Game not found" });
-    res.json(game);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
+  static async getAll(req: Request, res: Response) {
+    try {
+      const games = await gameService.getAllGames();
+      res.status(200).json({ success: true, data: games });
+    } catch (err: any) {
+      res.status(400).json({ success: false, message: err.message });
+    }
   }
-};
 
-export const update = async (req: Request, res: Response) => {
-  try {
-    const game = await updateGame(req.params.id, req.body);
-    if (!game) return res.status(404).json({ message: "Game not found" });
-    res.json(game);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
+  static async getById(req: Request, res: Response) {
+    try {
+      const game = await gameService.getGameById(req.params.gameId);
+      res.status(200).json({ success: true, data: game });
+    } catch (err: any) {
+      res.status(404).json({ success: false, message: err.message });
+    }
   }
-};
 
-export const remove = async (req: Request, res: Response) => {
-  try {
-    const deleted = await removeGame(req.params.id);
-    res.json({ message: "Game deleted" });
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
+  static async update(req: Request, res: Response) {
+    try {
+      const game = await gameService.updateGame(req.params.gameId, req.body);
+      res.status(200).json({ success: true, data: game });
+    } catch (err: any) {
+      res.status(400).json({ success: false, message: err.message });
+    }
   }
-};
+
+  static async deleteGame(req: Request, res: Response) {
+    try {
+      await gameService.deleteGame(req.params.gameId);
+      res.status(200).json({ success: true, message: "Game deleted successfully" });
+    } catch (err: any) {
+      res.status(400).json({ success: false, message: err.message });
+    }
+  }
+
+  static async join(req: Request, res: Response) {
+    try {
+      const game = await GameJoinService.joinGame(req.params.gameId, req.user!.id);
+      res.status(200).json({ success: true, data: game });
+    } catch (err: any) {
+      res.status(400).json({ success: false, message: err.message });
+    }
+  }
+
+  static async leave(req: Request, res: Response) {
+    try {
+      const game = await GameJoinService.leaveGame(req.params.gameId, req.user!.id);
+      res.status(200).json({ success: true, data: game });
+    } catch (err: any) {
+      res.status(400).json({ success: false, message: err.message });
+    }
+  }
+
+  static async getMyCreatedGames(req: Request, res: Response) {
+    try {
+      const games = await gameService.getGamesCreatedByUser(req.user!.id);
+      res.status(200).json({ success: true, data: games });
+    } catch (err: any) {
+      res.status(400).json({ success: false, message: err.message });
+    }
+  }
+
+  static async getMyJoinedGames(req: Request, res: Response) {
+    try {
+      const games = await gameService.getGamesJoinedByUser(req.user!.id);
+      res.status(200).json({ success: true, data: games });
+    } catch (err: any) {
+      res.status(400).json({ success: false, message: err.message });
+    }
+  }
+
+  static async getUserCreatedGames(req: Request, res: Response) {
+    try {
+      const games = await gameService.getGamesCreatedByUser(req.params.userId);
+      res.status(200).json({ success: true, data: games });
+    } catch (err: any) {
+      res.status(400).json({ success: false, message: err.message });
+    }
+  }
+
+  static async getUserJoinedGames(req: Request, res: Response) {
+    try {
+      const games = await gameService.getGamesJoinedByUser(req.params.userId);
+      res.status(200).json({ success: true, data: games });
+    } catch (err: any) {
+      res.status(400).json({ success: false, message: err.message });
+    }
+  }
+}

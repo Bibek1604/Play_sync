@@ -6,18 +6,17 @@ export const auth = (req: any, _res: any, next: any) => {
   if (!token) return next(new AppError("Unauthorized", 401));
 
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET!);
+    req.user = jwt.verify(token, process.env.JWT_ACCESS_SECRET!);
     next();
   } catch {
-    next(new AppError("Invalid token", 401));
+    next(new AppError("Token expired or invalid", 401));
   }
 };
 
-export const authorize =
+export const authorize = 
   (...roles: string[]) =>
   (req: any, _res: any, next: any) => {
-    if (!roles.includes(req.user.role)) {
+    if (!roles.includes(req.user.role))
       return next(new AppError("Forbidden", 403));
-    }
     next();
   };

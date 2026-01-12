@@ -1,27 +1,80 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getByRoom = exports.update = void 0;
+exports.LeaderboardController = void 0;
 const leaderboard_service_1 = require("./leaderboard.service");
-const update = async (req, res) => {
-    try {
-        const { roomId, score } = req.body;
-        const userId = req.user.id;
-        const result = await (0, leaderboard_service_1.updateScore)(roomId, userId, score);
-        res.json(result);
+class LeaderboardController {
+    static async getTopPlayers(req, res) {
+        try {
+            const limit = parseInt(req.query.limit) || 10;
+            const players = await leaderboard_service_1.LeaderboardService.getMostActivePlayers(limit);
+            res.status(200).json({
+                success: true,
+                data: players
+            });
+        }
+        catch (error) {
+            res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        }
     }
-    catch (error) {
-        res.status(400).json({ message: error.message });
+    static async getTopPlayersByGamesJoined(req, res) {
+        try {
+            const limit = parseInt(req.query.limit) || 10;
+            const players = await leaderboard_service_1.LeaderboardService.getTopPlayersByGamesJoined(limit);
+            res.status(200).json({
+                success: true,
+                data: players
+            });
+        }
+        catch (error) {
+            res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        }
     }
-};
-exports.update = update;
-const getByRoom = async (req, res) => {
-    try {
-        const leaderboard = await (0, leaderboard_service_1.getLeaderboardByRoom)(req.params.roomId);
-        res.json(leaderboard);
+    static async getMyStats(req, res) {
+        try {
+            const userId = req.user.id;
+            const stats = await leaderboard_service_1.LeaderboardService.getUserStats(userId);
+            const rank = await leaderboard_service_1.LeaderboardService.getUserRank(userId);
+            res.status(200).json({
+                success: true,
+                data: {
+                    ...stats.toObject(),
+                    rank
+                }
+            });
+        }
+        catch (error) {
+            res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        }
     }
-    catch (error) {
-        res.status(400).json({ message: error.message });
+    static async getUserStats(req, res) {
+        try {
+            const { userId } = req.params;
+            const stats = await leaderboard_service_1.LeaderboardService.getUserStats(userId);
+            const rank = await leaderboard_service_1.LeaderboardService.getUserRank(userId);
+            res.status(200).json({
+                success: true,
+                data: {
+                    ...stats.toObject(),
+                    rank
+                }
+            });
+        }
+        catch (error) {
+            res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        }
     }
-};
-exports.getByRoom = getByRoom;
+}
+exports.LeaderboardController = LeaderboardController;
 //# sourceMappingURL=leaderboard.controller.js.map

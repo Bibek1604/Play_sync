@@ -9,7 +9,7 @@ router.get("/me", auth, UserController.getMyProfile);
 
 router.post(
   "/admin/create-user",
-  [auth, authorize("admin"), UserController.adminCreateUser]
+  auth, authorize("admin"), UserController.adminCreateUser
 );
 
 export default router;

@@ -1,21 +1,29 @@
 import { Server, Socket } from "socket.io";
 import { saveMessage } from "../modules/chat/chat.service";
+import { GameModel } from "../modules/games/game.model";
 
 export const chatSocket = (io: Server) => {
   io.on("connection", (socket: Socket) => {
-    socket.on("join-room", (roomId: string) => {
-      socket.join(roomId);
+    socket.on("join-room", (gameId: string) => {
+      socket.join(gameId);
     });
 
     socket.on(
       "send-message",
-      async ({ roomId, message }: { roomId: string; message: string }) => {
+      async ({ gameId, message }: { gameId: string; message: string }) => {
         const userId = socket.data.user.id;
 
-        const savedMessage = await saveMessage(roomId, userId, message);
+        // Check if user is in the game
+        const game = await GameModel.findOne({ gameId });
+        if (!game || !game.players.includes(userId)) {
+          socket.emit("error", { message: "You are not part of this game" });
+          return;
+        }
 
-        io.to(roomId).emit("new-message", {
-          roomId,
+        const savedMessage = await saveMessage(gameId, userId, message);
+
+        io.to(gameId).emit("new-message", {
+          gameId,
           message: savedMessage.message,
           sender: socket.data.user,
           createdAt: savedMessage.get("createdAt")

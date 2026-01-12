@@ -1,45 +1,45 @@
-import * as CategoryRepo from "./category.repository";
-import { AppError } from "../../utils/appError";
+import { CategoryRepository } from "./category.repository";
+import { CreateCategoryDTO, UpdateCategoryDTO } from "./category.dto";
 
-export const createCategory = async (
-  name: string,
-  image: string
-) => {
-  const exists = await CategoryRepo.findByName(name);
-  if (exists) {
-    throw new AppError("Category already exists", 409);
+export class CategoryService {
+  constructor(private categoryRepo: CategoryRepository) {}
+
+  async createCategory(
+    dto: CreateCategoryDTO,
+    adminId: string
+  ) {
+    if (!["online", "offline"].includes(dto.type)) {
+      throw new Error("Invalid category type");
+    }
+
+    const existing = await this.categoryRepo.findByName(dto.name);
+    if (existing) {
+      throw new Error("Category already exists");
+    }
+
+    return this.categoryRepo.create({
+      ...dto,
+      createdBy: adminId,
+    });
   }
 
-  return CategoryRepo.createCategory({ name, image });
-};
-
-export const getAllCategories = async () => {
-  return CategoryRepo.findAll();
-};
-
-export const getCategoryById = async (id: string) => {
-  const category = await CategoryRepo.findById(id);
-  if (!category) {
-    throw new AppError("Category not found", 404);
+  async updateCategory(id: string, dto: UpdateCategoryDTO) {
+    const category = await this.categoryRepo.findById(id);
+    if (!category) {
+      throw new Error("Category not found");
+    }
+    return this.categoryRepo.updateById(id, dto);
   }
-  return category;
-};
 
-export const updateCategory = async (
-  id: string,
-  name: string,
-  image: string
-) => {
-  const updated = await CategoryRepo.updateById(id, { name, image });
-  if (!updated) {
-    throw new AppError("Category not found", 404);
+  async deleteCategory(id: string) {
+    const category = await this.categoryRepo.findById(id);
+    if (!category) {
+      throw new Error("Category not found");
+    }
+    return this.categoryRepo.deleteById(id);
   }
-  return updated;
-};
 
-export const removeCategory = async (id: string) => {
-  const deleted = await CategoryRepo.deleteById(id);
-  if (!deleted) {
-    throw new AppError("Category not found", 404);
+  async getAllCategories() {
+    return this.categoryRepo.findAll();
   }
-};
+}

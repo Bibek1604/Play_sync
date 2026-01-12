@@ -6,9 +6,10 @@ import path from "path";
 
 import authRoutes from "./modules/auth/auth.routes";
 import categoryRoutes from "./modules/category/category.routes";
-import gameRoutes from "./modules/games/game.routes";
-import roomRoutes from "./modules/room/room.routes";
-import leaderboardRoutes from "./modules/leaderboard/leaderboard.routes"
+// import gameRoutes from "./modules/games/game.routes";
+import userRoutes from "./modules/users/user.routes";
+// import roomRoutes from "./modules/room/room.routes";
+// import leaderboardRoutes from "./modules/leaderboard/leaderboard.routes"
 
 import { logger } from "./utils/logger";
 const app = express();
@@ -54,9 +55,10 @@ app.use(
 
 app.use("/auth", authRoutes);
 app.use("/categories", categoryRoutes);
-app.use("/games", gameRoutes);
-app.use("/rooms", roomRoutes);
-app.use("/leaderboard", leaderboardRoutes);
+// app.use("/games", gameRoutes);
+app.use("/users", userRoutes);
+// app.use("/rooms", roomRoutes);
+// app.use("/leaderboard", leaderboardRoutes);
 
 app.get("/", (_req, res) => {
   res.send(

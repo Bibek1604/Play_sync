@@ -8,7 +8,8 @@ export const findAll = () => {
   return User.find().select("-password");
 };
 
-export const findByEmail = (email: string) => {
-  return User.findOne({ email }) as Promise<IUser | null>;
+export const create = (userData: Partial<IUser>) => {
+  const user = new User(userData);
+  return user.save();
 };
 

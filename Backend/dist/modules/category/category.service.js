@@ -1,16 +1,40 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllCategories = exports.createCategory = void 0;
-const category_model_1 = __importDefault(require("./category.model"));
-const createCategory = async (name) => {
-    return await category_model_1.default.create({ name });
-};
-exports.createCategory = createCategory;
-const getAllCategories = async () => {
-    return await category_model_1.default.find();
-};
-exports.getAllCategories = getAllCategories;
+exports.CategoryService = void 0;
+class CategoryService {
+    constructor(categoryRepo) {
+        this.categoryRepo = categoryRepo;
+    }
+    async createCategory(dto, adminId) {
+        if (!["online", "offline"].includes(dto.type)) {
+            throw new Error("Invalid category type");
+        }
+        const existing = await this.categoryRepo.findByName(dto.name);
+        if (existing) {
+            throw new Error("Category already exists");
+        }
+        return this.categoryRepo.create({
+            ...dto,
+            createdBy: adminId,
+        });
+    }
+    async updateCategory(id, dto) {
+        const category = await this.categoryRepo.findById(id);
+        if (!category) {
+            throw new Error("Category not found");
+        }
+        return this.categoryRepo.updateById(id, dto);
+    }
+    async deleteCategory(id) {
+        const category = await this.categoryRepo.findById(id);
+        if (!category) {
+            throw new Error("Category not found");
+        }
+        return this.categoryRepo.deleteById(id);
+    }
+    async getAllCategories() {
+        return this.categoryRepo.findAll();
+    }
+}
+exports.CategoryService = CategoryService;
 //# sourceMappingURL=category.service.js.map

@@ -1,8 +1,13 @@
-import { z } from "zod";
+export interface CreateCategoryDTO {
+  name: string;
+  type: "online" | "offline";
+  image: string;
+  description?: string;
+}
 
-export const CreateCategoryDTO = z.object({
-  name: z.string().min(3),
-  image: z.string().url("Image must be a valid URL"),
-});
-
-export type CreateCategoryDto = z.infer<typeof CreateCategoryDTO>;
+export interface UpdateCategoryDTO {
+  name?: string;
+  image?: string;
+  description?: string;
+  isActive?: boolean;
+}

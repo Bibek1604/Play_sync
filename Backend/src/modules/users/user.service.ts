@@ -10,9 +10,9 @@ export const getMyProfile = async (userId: string) => {
 };
 
 export const getAllUsers = async () => {
-  const users = await UserRepo.findAll();
-  if (!users.length) {
-    throw new AppError("No users found", 404);
-  }
-  return users;
+  return await UserRepo.findAll();
+};
+
+export const createUser = async (userData: any) => {
+  return await UserRepo.create(userData);
 };

@@ -1,31 +1,37 @@
-import Category from "./category.model";
+import { CategoryModel, ICategory } from "./category.model";
+import { CreateCategoryDTO, UpdateCategoryDTO } from "./category.dto";
 
-export const findByName = (name: string) => {
-  return Category.findOne({ name });
-};
+export class CategoryRepository {
+  async findByName(name: string): Promise<ICategory | null> {
+    return CategoryModel.findOne({ name });
+  }
 
-export const createCategory = (data: {
-  name: string;
-  image: string;
-}) => {
-  return Category.create(data);
-};
+  async create(
+    data: CreateCategoryDTO & { createdBy: string }
+  ): Promise<ICategory> {
+    return CategoryModel.create(data);
+  }
 
-export const findAll = () => {
-  return Category.find({ isActive: true });
-};
+  async findAllActive(): Promise<ICategory[]> {
+    return CategoryModel.find({ isActive: true }).sort({ createdAt: -1 });
+  }
 
-export const findById = (id: string) => {
-  return Category.findById(id);
-};
+  async updateById(
+    id: string,
+    data: UpdateCategoryDTO
+  ): Promise<ICategory | null> {
+    return CategoryModel.findByIdAndUpdate(id, data, { new: true });
+  }
 
-export const updateById = (
-  id: string,
-  data: { name: string; image: string }
-) => {
-  return Category.findByIdAndUpdate(id, data, { new: true });
-};
+  async deleteById(id: string): Promise<ICategory | null> {
+    return CategoryModel.findByIdAndDelete(id);
+  }
 
-export const deleteById = (id: string) => {
-  return Category.findByIdAndDelete(id);
-};
+  async findById(id: string): Promise<ICategory | null> {
+    return CategoryModel.findById(id);
+  }
+
+  async findAll(): Promise<ICategory[]> {
+    return CategoryModel.find().sort({ createdAt: -1 });
+  }
+}
